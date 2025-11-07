@@ -74,7 +74,6 @@ in
       '';
     in
     {
-      # IPv4 firewall rules
       networking.firewall.extraCommands = ''
         # Allow access to the specified TCP ports from the specified IPv4 addresses.
         ${lib.concatMapStringsSep "\n" (portWithIps: ''
@@ -88,6 +87,20 @@ in
           ${lib.concatMapStringsSep "\n" (ip: ''
             ${createIPv4Command "udp" portWithIps.port ip}
           '') (filterIPv4 portWithIps.ips)}
+        '') config.networking.firewall.ipBasedAllowedUDPPorts}
+
+        # Allow access to the specified TCP ports from the specified IPv6 addresses.
+        ${lib.concatMapStringsSep "\n" (portWithIps: ''
+          ${lib.concatMapStringsSep "\n" (ip: ''
+            ${createIPv6Command "tcp" portWithIps.port ip}
+          '') (filterIPv6 portWithIps.ips)}
+        '') config.networking.firewall.ipBasedAllowedTCPPorts}
+
+        # Allow access to the specified UDP ports from the specified IPv6 addresses.
+        ${lib.concatMapStringsSep "\n" (portWithIps: ''
+          ${lib.concatMapStringsSep "\n" (ip: ''
+            ${createIPv6Command "udp" portWithIps.port ip}
+          '') (filterIPv6 portWithIps.ips)}
         '') config.networking.firewall.ipBasedAllowedUDPPorts}
       '';
 
@@ -105,26 +118,7 @@ in
             ${removeIPv4Command "udp" portWithIps.port ip}
           '') (filterIPv4 portWithIps.ips)}
         '') config.networking.firewall.ipBasedAllowedUDPPorts}
-      '';
 
-      # IPv6 firewall rules
-      networking.firewall.extraIPv6Commands = ''
-        # Allow access to the specified TCP ports from the specified IPv6 addresses.
-        ${lib.concatMapStringsSep "\n" (portWithIps: ''
-          ${lib.concatMapStringsSep "\n" (ip: ''
-            ${createIPv6Command "tcp" portWithIps.port ip}
-          '') (filterIPv6 portWithIps.ips)}
-        '') config.networking.firewall.ipBasedAllowedTCPPorts}
-
-        # Allow access to the specified UDP ports from the specified IPv6 addresses.
-        ${lib.concatMapStringsSep "\n" (portWithIps: ''
-          ${lib.concatMapStringsSep "\n" (ip: ''
-            ${createIPv6Command "udp" portWithIps.port ip}
-          '') (filterIPv6 portWithIps.ips)}
-        '') config.networking.firewall.ipBasedAllowedUDPPorts}
-      '';
-
-      networking.firewall.extraIPv6StopCommands = ''
         # Drop ip based allowed tcp ports rules for IPv6
         ${lib.concatMapStringsSep "\n" (portWithIps: ''
           ${lib.concatMapStringsSep "\n" (ip: ''
