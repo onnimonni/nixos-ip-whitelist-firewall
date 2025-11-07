@@ -54,6 +54,8 @@ let
   ipOffice = "x.x.x.x";
   ipHome = "y.y.y.y";
   ipDatacenter = "z.z.z.z/24";
+  ipv6Office = "2001:db8::1";
+  ipv6Home = "2001:db8::2";
 in
 {
   networking.firewall.ipBasedAllowedTCPPorts = [
@@ -63,6 +65,28 @@ in
         ipOffice
         ipHome
         ipDatacenter
+        ipv6Office
+        ipv6Home
+      ];
+    }
+  ];
+}
+```
+
+## IPv6 Support
+
+The module automatically detects whether an IP address is IPv4 or IPv6 and uses the appropriate firewall command (`iptables` for IPv4, `ip6tables` for IPv6). You can mix both IPv4 and IPv6 addresses in the same configuration:
+
+```nix
+{
+  networking.firewall.ipBasedAllowedTCPPorts = [
+    {
+      port = 443;
+      ips = [
+        "192.0.2.1"                    # IPv4 address
+        "198.51.100.0/24"              # IPv4 CIDR range
+        "2001:db8::1"                  # IPv6 address
+        "2001:db8:abcd::/48"           # IPv6 CIDR range
       ];
     }
   ];
